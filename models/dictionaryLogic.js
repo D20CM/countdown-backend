@@ -48,11 +48,14 @@ export async function handleLetters(letters) {
       // setDefinitions((definitions) => {
       //   return { ...definitions, [word]: definition };
       // });
+      definitions.push({ [word]: definition });
       console.log("truthie log");
-      console.log(definitions);
+
       return true;
     }
   }
+
+  // console.log("DEFINITIONS ", definitions);
 
   //filter out any words that are not defined by the Mirriam-Webster dictionary
 
@@ -62,16 +65,30 @@ export async function handleLetters(letters) {
     // Promise all to await resolutions wordsThatHaveDefinitions = await Promise.all(words.map(checkDefinition))
     //   //filter the words array by index of checked words filteredWords = words.filter((word, index) => wordsThatHaveDefinitions[index])
 
-    let wordsThatHaveDefinitions = await Promise.all(
-      words.map((word) => callDictionaryAPI(word))
-    );
-    console.log("Words that have definitions: ", wordsThatHaveDefinitions);
+    console.log("INITIAL WORDS:", words);
+    let definedWords = {};
+    for (let i = 0; i < words.length; i++) {
+      const resultOfApiCall = await callDictionaryAPI(words[i]);
+      const definition = resultOfApiCall;
+      if (definition) {
+        definedWords[words[i]] = definition;
+        console.log("new definition ", definition);
+      }
+    }
 
-    const definedWords = words.filter(
-      (word, index) => wordsThatHaveDefinitions[index]
-    );
-    console.log("Defined words are: ", definedWords);
-    return definedWords;
+    console.log("WHERE ARE MY WORDS", definedWords);
+
+    // let wordsThatHaveDefinitions = await Promise.all(
+    //   words.map(async (word) => await callDictionaryAPI(word))
+    // );
+    // console.log("Words that have definitions: ", wordsThatHaveDefinitions);
+
+    // const definedWords = words.filter(
+    //   (word, index) => wordsThatHaveDefinitions[index]
+    // );
+    // console.log("Defined words are: ", definedWords);
+    // return definedWords;
+    return words;
   }
 
   async function startChecking() {
@@ -81,18 +98,6 @@ export async function handleLetters(letters) {
     //check that all 9 tiles have a letter in them
     //this will be done on front-end, but could also revalidate here??
     //todo - make this check that only letters are allowed (regex)
-    // if (
-    //   letters.some((letter) => letter === "") ||
-    //   letters.some((letter) => letter === " ")
-    // ) {
-    //   console.log(
-    //     "One or more letters is empty.  Please input 9 letters to find the best words."
-    //   );
-    //   alert(
-    //     "One or more letters is empty.  Please input 9 letters to find the best words."
-    //   );
-    //   return null;
-    // }
 
     //starting with 9 letter words...
     let results = words.filter(
